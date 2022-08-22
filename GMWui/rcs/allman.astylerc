@@ -1,0 +1,13 @@
+--style=allman #大括号allman方式
+--indent=tab
+--indent=force-tab #强制使用制表符
+#--indent-namespaces #设置 namespace 整体缩进
+--indent-preproc-block #设置预处理模块缩进
+--indent-preproc-define #设置宏定义模块缩进
+#--indent-cases #cases缩进 
+--pad-oper #操作符前后填充空格
+--pad-comma #逗号后面加空格
+--unpad-paren #括号前后无空格
+--add-braces #单行语句加上大括号
+--align-pointer=name # *、&这类字符靠近变量名字
+--align-reference=type #引用符号靠近类型

@@ -1,0 +1,10 @@
+--style=mozilla
+--break-closing-braces
+--attach-closing-while
+--max-continuation-indent=120
+--pad-oper
+--pad-comma
+--unpad-paren
+--align-pointer=type
+--align-reference=type
+--add-braces

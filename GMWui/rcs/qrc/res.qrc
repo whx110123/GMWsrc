@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/PNG_48x48/button_minus_blue.png</file>
+        <file>images/PNG_48x48/button_plus_blue.png</file>
+        <file>images/PNG_64x64/document_64.png</file>
+        <file>images/PNG_64x64/folder_64.png</file>
+        <file>images/PNG_64x64/pencil_64.png</file>
+        <file>images/PNG_64x64/save_64.png</file>
+        <file>images/PNG_64x64/exit.png</file>
+        <file>images/PNG_64x64/delete_64.png</file>
+    </qresource>
+</RCC>
