@@ -36,7 +36,11 @@ void MainWindow::InitModel()
 {
     m_currentModel = nullptr;
     m_emptyModel = new MyItemModel(this);
+    QHeaderView* header = ui->treeView_list->header();
+    header->setStretchLastSection(true);
+
     m_typeModel = new MyItemModel(this);
+    m_typeModel->clear();
     ui->treeView_type->setModel(m_typeModel);
     ui->treeView_type->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView_type->setHeaderHidden(true);

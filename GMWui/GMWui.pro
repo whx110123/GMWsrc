@@ -15,11 +15,11 @@ CONFIG += c++11
 
 msvc:QMAKE_CXXFLAGS += /utf-8
 
-TARGET              = PDTool
+TARGET              = GMWui
 TEMPLATE            = app
 win32:RC_FILE       = rcs/main.rc
 CONFIG              += warn_off
-DEFINES				+= QT_MESSAGELOGCONTEXT
+DEFINES             += QT_MESSAGELOGCONTEXT
 
 include             ($$PWD/src/src.pri)
 
