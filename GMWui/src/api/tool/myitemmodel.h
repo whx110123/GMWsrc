@@ -12,7 +12,7 @@ public:
 
     void SetXmlPath(const QString& xmlPath);
     bool InitXml();
-
+    void MakeXml(QXmlStreamWriter& writer);
     void AddOneRow(const QStringList& itemLst);
     void AddOneRow(const QStringList& itemLst, QStandardItem* parent);
 private:

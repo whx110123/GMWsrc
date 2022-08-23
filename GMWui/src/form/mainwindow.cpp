@@ -229,3 +229,26 @@ void MainWindow::on_treeView_type_customContextMenuRequested(const QPoint& pos)
         ui->treeView_type->collapseAll();
     }
 }
+
+void MainWindow::on_actSave_triggered()
+{
+    if(!m_typeModel) {
+        return;
+    }
+    QFile file("demo.xml");
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
+
+    QXmlStreamWriter stream(&file);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+
+    for(int i = 0; i < m_typeModel->rowCount(); i++) {
+        QStandardItem* item = m_typeModel->item(i, 0);
+        m_currentModel = item->data().value<MyItemModel*>();
+        if(m_currentModel) {
+            m_currentModel->MakeXml(stream);
+        }
+    }
+    stream.writeEndDocument();
+    file.close();
+}

@@ -47,7 +47,7 @@
     </property>
     <addaction name="actFileOpen"/>
     <addaction name="actNew"/>
-    <addaction name="actFileSave"/>
+    <addaction name="actSave"/>
     <addaction name="actExit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -78,7 +78,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actFileSave"/>
+   <addaction name="actSave"/>
    <addaction name="actNew"/>
    <addaction name="actDelete"/>
   </widget>
@@ -234,7 +234,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actFileSave">
+  <action name="actSave">
    <property name="icon">
     <iconset resource="../../rcs/qrc/res.qrc">
      <normaloff>:/images/images/PNG_64x64/save_64.png</normaloff>:/images/images/PNG_64x64/save_64.png</iconset>

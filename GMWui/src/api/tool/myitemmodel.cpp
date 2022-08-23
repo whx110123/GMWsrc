@@ -105,6 +105,18 @@ bool MyItemModel::InitXml()
     return true;
 }
 
+void MyItemModel::MakeXml(QXmlStreamWriter& writer)
+{
+    for(int i = 0; i < this->rowCount(); i++) {
+        writer.writeStartElement("game");
+        for(int j = 0; j < this->columnCount(); j++) {
+            writer.writeTextElement(this->horizontalHeaderItem(j)->data(Qt::EditRole).toString(),
+                                    this->item(i, j)->data(Qt::EditRole).toString());
+        }
+        writer.writeEndElement();
+    }
+}
+
 void MyItemModel::AddOneRow(const QStringList& itemLst)
 {
     QList<QStandardItem*> items;
@@ -135,7 +147,7 @@ void MyItemModel::ParseGameElement(QXmlStreamReader& reader)
 {
     QList<QStandardItem*> items;
     QStandardItem* item = nullptr;
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < this->columnCount(); i++) {
         item = new QStandardItem;
         item->setFlags(item->flags() & (~Qt::ItemIsEditable));
         items.append(item);

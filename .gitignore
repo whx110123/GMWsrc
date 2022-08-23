@@ -3,3 +3,4 @@
 *.exe
 dep/bin/GMWui.ini
 dep/bin_debug/GMWui.ini
+*.xml

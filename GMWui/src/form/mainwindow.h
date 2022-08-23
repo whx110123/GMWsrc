@@ -40,6 +40,8 @@ private slots:
 
     void on_treeView_type_customContextMenuRequested(const QPoint& pos);
 
+    void on_actSave_triggered();
+
 private:
     Ui::MainWindow* ui;
     FunGetPicDlg* getpic;
