@@ -10,7 +10,6 @@ class MyItemModel : public QStandardItemModel
 public:
     MyItemModel(QObject* parent = nullptr);
     bool InitXml(const QString& xmlPath);
-    QStandardItem* InitTypeXml(QXmlStreamReader& reader, QStandardItem* parent);
 
     bool ImportXml(const QString& xmlPath);
 
@@ -23,6 +22,7 @@ public:
     void AddOneRow(const QStringList& itemLst);
     void AddOneRow(const QStringList& itemLst, QStandardItem* parent);
 private:
+
     void ParseGameElement(QXmlStreamReader& reader);
     void ParseMachineElement(QXmlStreamReader& reader);
 

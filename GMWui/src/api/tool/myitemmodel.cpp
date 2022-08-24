@@ -18,7 +18,8 @@ bool MyItemModel::InitXml(const QString& xmlPath)
     this->clear();
     QXmlStreamReader reader(&file);
 
-    QStandardItem* parent = this->invisibleRootItem();
+    QList<QStandardItem*> itemLst;
+    itemLst.append(this->invisibleRootItem());
     // 解析 XML，直到结束
     while(!reader.atEnd()) {
         // 读取下一个元素
@@ -33,14 +34,50 @@ bool MyItemModel::InitXml(const QString& xmlPath)
         case QXmlStreamReader::EndDocument:   // 结束文档
             break;
         case QXmlStreamReader::StartElement: {  // 开始元素
-            parent = InitTypeXml(reader, parent);
-            break;
-        }
-        case QXmlStreamReader::EndElement:
-            if(parent->parent()) {
-                parent = parent->parent();
+            QString strElementName = reader.name().toString();
+            if(QString::compare(strElementName, "游戏") == 0) {
+                QXmlStreamAttributes attributes = reader.attributes();
+                if(attributes.hasAttribute("类型")) {
+                    QString strName = attributes.value("类型").toString();
+                    QStandardItem* item = new QStandardItem;
+                    item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+                    item->setData(strName, Qt::EditRole);
+                    MyItemModel* tmpModel = new MyItemModel(this);
+                    QVariant v;
+                    v.setValue(tmpModel);
+                    item->setData(v);
+
+                    itemLst.last()->appendRow(item);
+                    itemLst.append(item);
+                }
+            }
+            if(QString::compare(strElementName, "条目") == 0) {
+                reader.readNext();
+                MyItemModel* model = itemLst.last()->data().value<MyItemModel*>();
+                if(model) {
+                    QList<QStandardItem*> items;
+                    QStandardItem* item = nullptr;
+                    for(int i = 0; i < model->columnCount(); i++) {
+                        item = new QStandardItem;
+                        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+                        reader.readNext();
+                        item->setData(reader.readElementText(), Qt::EditRole);
+
+                        items.append(item);
+                        reader.readNext();
+                    }
+                    model->appendRow(items);
+                }
             }
             break;
+        }
+        case QXmlStreamReader::EndElement: {
+            QString strElementName = reader.name().toString();
+            if(QString::compare(strElementName, "游戏") == 0) {
+                itemLst.takeLast();
+            }
+            break;
+        }
         case QXmlStreamReader::Characters:
             break;
         case QXmlStreamReader::Comment:   // 注释
@@ -62,34 +99,6 @@ bool MyItemModel::InitXml(const QString& xmlPath)
 
     file.close();  // 关闭文件
     return true;
-}
-
-QStandardItem* MyItemModel::InitTypeXml(QXmlStreamReader& reader, QStandardItem* parent)
-{
-    QString strElementName = reader.name().toString();
-    if(QString::compare(strElementName, "游戏") == 0) {
-        QXmlStreamAttributes attributes = reader.attributes();
-        if(attributes.hasAttribute("类型")) {
-            QString strName = attributes.value("类型").toString();
-            QStandardItem* item = new QStandardItem;
-            item->setFlags(item->flags() & (~Qt::ItemIsEditable));
-
-            MyItemModel* tmpModel = new MyItemModel(this);
-            QVariant v;
-            v.setValue(tmpModel);
-            item->setData(v);
-
-            parent->appendRow(item);
-            parent = item;
-        }
-    }
-    if(QString::compare(strElementName, "条目") == 0) {
-        MyItemModel* model = parent->data().value<MyItemModel*>();
-        if(model) {
-
-        }
-    }
-    return parent;
 }
 
 bool MyItemModel::ImportXml(const QString& xmlPath)

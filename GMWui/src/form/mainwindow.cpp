@@ -242,9 +242,11 @@ void MainWindow::on_actSave_triggered()
     QXmlStreamWriter writer(&file);
     writer.setAutoFormatting(true);
     writer.writeStartDocument();
+    writer.writeStartElement("所有数据");
 
     m_typeModel->MakeTypeXml(writer);
 
+    writer.writeEndElement();
     writer.writeEndDocument();
     file.close();
 }
