@@ -45,7 +45,6 @@ private slots:
 private:
     Ui::MainWindow* ui;
     FunGetPicDlg* getpic;
-    MyItemModel* m_currentModel;
     MyItemModel* m_emptyModel;
     MyItemModel* m_typeModel;
 };

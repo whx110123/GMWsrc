@@ -9,14 +9,92 @@ MyItemModel::MyItemModel(QObject* parent): QStandardItemModel(parent)
     setHorizontalHeaderLabels(QStringList() << "序号" << "名称" << "描述" << "中文描述");
 }
 
-void MyItemModel::SetXmlPath(const QString& xmlPath)
+bool MyItemModel::InitXml(const QString& xmlPath)
 {
-    m_xmlPath = xmlPath;
+    QFile file(xmlPath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) { // 以只读模式打开文件
+        return false;
+    }
+    this->clear();
+    QXmlStreamReader reader(&file);
+
+    QStandardItem* parent = this->invisibleRootItem();
+    // 解析 XML，直到结束
+    while(!reader.atEnd()) {
+        // 读取下一个元素
+        QXmlStreamReader::TokenType nType = reader.readNext();
+        switch(nType) {
+        case QXmlStreamReader::NoToken:
+            break;
+        case QXmlStreamReader::Invalid:
+            break;
+        case QXmlStreamReader::StartDocument:   // 开始文档
+            break;
+        case QXmlStreamReader::EndDocument:   // 结束文档
+            break;
+        case QXmlStreamReader::StartElement: {  // 开始元素
+            parent = InitTypeXml(reader, parent);
+            break;
+        }
+        case QXmlStreamReader::EndElement:
+            if(parent->parent()) {
+                parent = parent->parent();
+            }
+            break;
+        case QXmlStreamReader::Characters:
+            break;
+        case QXmlStreamReader::Comment:   // 注释
+            break;
+        case QXmlStreamReader::DTD:    // DTD
+            break;
+        case QXmlStreamReader::EntityReference:
+            break;
+        case QXmlStreamReader::ProcessingInstruction:   // 处理指令
+            break;
+        default:
+            break;
+        }
+    }
+
+    if(reader.hasError()) {   // 解析出错
+        qDebug() << QString("错误信息：%1  行号：%2  列号：%3  字符位移：%4").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber()).arg(reader.characterOffset());
+    }
+
+    file.close();  // 关闭文件
+    return true;
 }
 
-bool MyItemModel::InitXml()
+QStandardItem* MyItemModel::InitTypeXml(QXmlStreamReader& reader, QStandardItem* parent)
 {
-    QFile file(m_xmlPath);
+    QString strElementName = reader.name().toString();
+    if(QString::compare(strElementName, "游戏") == 0) {
+        QXmlStreamAttributes attributes = reader.attributes();
+        if(attributes.hasAttribute("类型")) {
+            QString strName = attributes.value("类型").toString();
+            QStandardItem* item = new QStandardItem;
+            item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+
+            MyItemModel* tmpModel = new MyItemModel(this);
+            QVariant v;
+            v.setValue(tmpModel);
+            item->setData(v);
+
+            parent->appendRow(item);
+            parent = item;
+        }
+    }
+    if(QString::compare(strElementName, "条目") == 0) {
+        MyItemModel* model = parent->data().value<MyItemModel*>();
+        if(model) {
+
+        }
+    }
+    return parent;
+}
+
+bool MyItemModel::ImportXml(const QString& xmlPath)
+{
+    QFile file(xmlPath);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) { // 以只读模式打开文件
         return false;
     }
@@ -67,7 +145,7 @@ bool MyItemModel::InitXml()
 //            qDebug() << QString("********** 注释 ********** ");
 //            QString strComment = reader.text().toString();
 //            qDebug() << strComment << "\r\n";
-//            break;
+            break;
         }
         case QXmlStreamReader::DTD: {   // DTD
 //            qDebug() << QString("********** DTD ********** ");
@@ -105,13 +183,52 @@ bool MyItemModel::InitXml()
     return true;
 }
 
-void MyItemModel::MakeXml(QXmlStreamWriter& writer)
+void MyItemModel::MakeTypeXml(QXmlStreamWriter& writer)
 {
-    for(int i = 0; i < this->rowCount(); i++) {
-        writer.writeStartElement("game");
-        for(int j = 0; j < this->columnCount(); j++) {
-            writer.writeTextElement(this->horizontalHeaderItem(j)->data(Qt::EditRole).toString(),
-                                    this->item(i, j)->data(Qt::EditRole).toString());
+    MakeTypeItemXml(writer, this->invisibleRootItem());
+}
+
+void MyItemModel::MakeTypeItemXml(QXmlStreamWriter& writer, QStandardItem* parent)
+{
+    MyItemModel* model;
+    for(int i = 0; i < parent->rowCount(); i++) {
+        QStandardItem* item = parent->child(i);
+        writer.writeStartElement("游戏");
+        writer.writeAttribute("类型", item->data(Qt::EditRole).toString());
+        model = item->data().value<MyItemModel*>();
+        if(model) {
+            model->MakeGameXml(writer);
+        }
+
+        if(item->hasChildren()) {
+            MakeTypeItemXml(writer, item);
+        }
+
+        writer.writeEndElement();
+    }
+}
+
+void MyItemModel::MakeGameXml(QXmlStreamWriter& writer)
+{
+    QStringList qualifiedLst;
+    for(int j = 0; j < this->columnCount(); j++) {
+        qualifiedLst << this->horizontalHeaderItem(j)->data(Qt::EditRole).toString();
+    }
+    MakeGameItemXml(writer, this->invisibleRootItem(), qualifiedLst);
+
+}
+
+void MyItemModel::MakeGameItemXml(QXmlStreamWriter& writer, QStandardItem* parent, const QStringList& qualifiedLst)
+{
+    for(int i = 0; i < parent->rowCount(); i++) {
+        writer.writeStartElement("条目");
+        for(int j = 0; j < parent->columnCount(); j++) {
+            writer.writeTextElement(qualifiedLst.at(j),
+                                    parent->child(i, j)->data(Qt::EditRole).toString());
+        }
+        QStandardItem* item = parent->child(i, 0);
+        if(item->hasChildren()) {
+            MakeGameItemXml(writer, item, qualifiedLst);
         }
         writer.writeEndElement();
     }

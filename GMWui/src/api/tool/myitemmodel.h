@@ -9,17 +9,23 @@ class MyItemModel : public QStandardItemModel
     Q_OBJECT
 public:
     MyItemModel(QObject* parent = nullptr);
+    bool InitXml(const QString& xmlPath);
+    QStandardItem* InitTypeXml(QXmlStreamReader& reader, QStandardItem* parent);
 
-    void SetXmlPath(const QString& xmlPath);
-    bool InitXml();
-    void MakeXml(QXmlStreamWriter& writer);
+    bool ImportXml(const QString& xmlPath);
+
+    void MakeTypeXml(QXmlStreamWriter& writer);
+    void MakeTypeItemXml(QXmlStreamWriter& writer, QStandardItem* parent);
+
+    void MakeGameXml(QXmlStreamWriter& writer);
+    void MakeGameItemXml(QXmlStreamWriter& writer, QStandardItem* parent, const QStringList& qualifiedLst);
+
     void AddOneRow(const QStringList& itemLst);
     void AddOneRow(const QStringList& itemLst, QStandardItem* parent);
 private:
     void ParseGameElement(QXmlStreamReader& reader);
     void ParseMachineElement(QXmlStreamReader& reader);
-private:
-    QString m_xmlPath;
+
 public:
     QString m_lastError;
 };

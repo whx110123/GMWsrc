@@ -34,7 +34,6 @@ void MainWindow::InitConfig()
 
 void MainWindow::InitModel()
 {
-    m_currentModel = nullptr;
     m_emptyModel = new MyItemModel(this);
     QHeaderView* header = ui->treeView_list->header();
     header->setStretchLastSection(true);
@@ -44,9 +43,11 @@ void MainWindow::InitModel()
     ui->treeView_type->setModel(m_typeModel);
     ui->treeView_type->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView_type->setHeaderHidden(true);
-
+    m_typeModel->InitXml("GMWui.xml");
     connect(ui->treeView_type->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &MainWindow::SelectionChanged);
+
+
 }
 
 int MainWindow::MaybeSave()
@@ -111,9 +112,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::SelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     QStandardItem* item = m_typeModel->itemFromIndex(selected.indexes().at(0));
-    m_currentModel = item->data().value<MyItemModel*>();
-    if(m_currentModel) {
-        ui->treeView_list->setModel(m_currentModel);
+    MyItemModel* tmpModel = item->data().value<MyItemModel*>();
+    if(tmpModel) {
+        ui->treeView_list->setModel(tmpModel);
     }
     else {
         ui->treeView_list->setModel(m_emptyModel);
@@ -196,24 +197,24 @@ void MainWindow::on_treeView_type_customContextMenuRequested(const QPoint& pos)
         if(xmlPath.isEmpty()) {
             return;
         }
-        m_currentModel = item->data().value<MyItemModel*>();
-        if(m_currentModel) {
-            delete m_currentModel;
-            m_currentModel = nullptr;
+        MyItemModel* tmpModel = item->data().value<MyItemModel*>();
+        if(tmpModel) {
+            delete tmpModel;
+            tmpModel = nullptr;
         }
         item->setData(0);
 
-        m_currentModel = new MyItemModel(this);
-        ui->treeView_list->setModel(m_currentModel);
-        m_currentModel->SetXmlPath(xmlPath);
-        if(m_currentModel->InitXml()) {
+        tmpModel = new MyItemModel(this);
+        ui->treeView_list->setModel(tmpModel);
+
+        if(tmpModel->ImportXml(xmlPath)) {
             QVariant v;
-            v.setValue(m_currentModel);
+            v.setValue(tmpModel);
             item->setData(v);
         }
         else {
-            delete m_currentModel;
-            m_currentModel = nullptr;
+            delete tmpModel;
+            tmpModel = nullptr;
         }
     }
     else if(ret == expand_subtrees) {
@@ -235,20 +236,15 @@ void MainWindow::on_actSave_triggered()
     if(!m_typeModel) {
         return;
     }
-    QFile file("demo.xml");
+    QFile file("GMWui.xml");
     file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
 
-    QXmlStreamWriter stream(&file);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
+    QXmlStreamWriter writer(&file);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
 
-    for(int i = 0; i < m_typeModel->rowCount(); i++) {
-        QStandardItem* item = m_typeModel->item(i, 0);
-        m_currentModel = item->data().value<MyItemModel*>();
-        if(m_currentModel) {
-            m_currentModel->MakeXml(stream);
-        }
-    }
-    stream.writeEndDocument();
+    m_typeModel->MakeTypeXml(writer);
+
+    writer.writeEndDocument();
     file.close();
 }
