@@ -112,13 +112,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::SelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     QStandardItem* item = m_typeModel->itemFromIndex(selected.indexes().at(0));
-    MyItemModel* tmpModel = item->data().value<MyItemModel*>();
-    if(tmpModel) {
-        ui->treeView_list->setModel(tmpModel);
+    if(item) {
+        MyItemModel* tmpModel = item->data().value<MyItemModel*>();
+        if(tmpModel) {
+            ui->treeView_list->setModel(tmpModel);
+            return;
+        }
     }
-    else {
-        ui->treeView_list->setModel(m_emptyModel);
-    }
+    ui->treeView_list->setModel(m_emptyModel);
 }
 
 void MainWindow::on_actGetPng_triggered()
@@ -168,7 +169,7 @@ void MainWindow::on_treeView_type_customContextMenuRequested(const QPoint& pos)
         if(str.isEmpty()) {
             return;
         }
-        model->AddOneRow(QStringList() << str);
+        model->AddOneRow(QStringList() << str, nullptr);
     }
     else if(ret == add_subitem) {
         QString str = QInputDialog::getText(this, "输入游戏类型", "");
@@ -182,6 +183,8 @@ void MainWindow::on_treeView_type_customContextMenuRequested(const QPoint& pos)
             item->parent()->removeRow(index.row());
         }
         else {
+            ui->treeView_type->reset();
+            ui->treeView_list->setModel(m_emptyModel);
             model->removeRow(index.row());
         }
     }
@@ -241,6 +244,7 @@ void MainWindow::on_actSave_triggered()
 
     QXmlStreamWriter writer(&file);
     writer.setAutoFormatting(true);
+    writer.setAutoFormattingIndent(-1);
     writer.writeStartDocument();
     writer.writeStartElement("所有数据");
 

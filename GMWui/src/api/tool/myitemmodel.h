@@ -19,7 +19,6 @@ public:
     void MakeGameXml(QXmlStreamWriter& writer);
     void MakeGameItemXml(QXmlStreamWriter& writer, QStandardItem* parent, const QStringList& qualifiedLst);
 
-    void AddOneRow(const QStringList& itemLst);
     void AddOneRow(const QStringList& itemLst, QStandardItem* parent);
 private:
 

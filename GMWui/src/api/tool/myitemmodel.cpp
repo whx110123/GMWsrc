@@ -59,7 +59,9 @@ bool MyItemModel::InitXml(const QString& xmlPath)
                     QStandardItem* item = nullptr;
                     for(int i = 0; i < model->columnCount(); i++) {
                         item = new QStandardItem;
-                        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+                        if(i < 3) {
+                            item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+                        }
                         reader.readNext();
                         item->setData(reader.readElementText(), Qt::EditRole);
 
@@ -243,19 +245,6 @@ void MyItemModel::MakeGameItemXml(QXmlStreamWriter& writer, QStandardItem* paren
     }
 }
 
-void MyItemModel::AddOneRow(const QStringList& itemLst)
-{
-    QList<QStandardItem*> items;
-    QStandardItem* item = nullptr;
-    for(int i = 0; i < itemLst.size(); i++) {
-        item = new QStandardItem;
-        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
-        item->setData(itemLst.at(i), Qt::EditRole);
-        items.append(item);
-    }
-    this->appendRow(items);
-}
-
 void MyItemModel::AddOneRow(const QStringList& itemLst, QStandardItem* parent)
 {
     QList<QStandardItem*> items;
@@ -266,7 +255,12 @@ void MyItemModel::AddOneRow(const QStringList& itemLst, QStandardItem* parent)
         item->setData(itemLst.at(i), Qt::EditRole);
         items.append(item);
     }
-    parent->appendRow(items);
+    if(parent) {
+        parent->appendRow(items);
+    }
+    else {
+        this->appendRow(items);
+    }
 }
 
 void MyItemModel::ParseGameElement(QXmlStreamReader& reader)
@@ -275,7 +269,9 @@ void MyItemModel::ParseGameElement(QXmlStreamReader& reader)
     QStandardItem* item = nullptr;
     for(int i = 0; i < this->columnCount(); i++) {
         item = new QStandardItem;
-        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+        if(i < 3) {
+            item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+        }
         items.append(item);
     }
     item = items.at(0);
@@ -318,9 +314,11 @@ void MyItemModel::ParseMachineElement(QXmlStreamReader& reader)
 {
     QList<QStandardItem*> items;
     QStandardItem* item = nullptr;
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < this->columnCount(); i++) {
         item = new QStandardItem;
-        item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+        if(i < 3) {
+            item->setFlags(item->flags() & (~Qt::ItemIsEditable));
+        }
         items.append(item);
     }
     item = items.at(0);
